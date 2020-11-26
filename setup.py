@@ -5,14 +5,18 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="EQL", # Replace with your own username
-    version="0.0.1",
+    version="0.0.4",
     author="Kristof Pusztai",
     author_email="kpusztai@berkeley.edu",
     description="An implementation of Equation Learning Based Neural Network Model",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/pypa/sampleproject",
+    url="https://github.com/KristofPusztai/EQL",
     packages=setuptools.find_packages(),
+    install_requires=[
+        'numpy',
+        'tensorflow',
+    ],
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",

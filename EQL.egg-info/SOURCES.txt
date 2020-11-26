@@ -1,0 +1,9 @@
+README.md
+setup.py
+EQL/__init__.py
+EQL/model.py
+EQL.egg-info/PKG-INFO
+EQL.egg-info/SOURCES.txt
+EQL.egg-info/dependency_links.txt
+EQL.egg-info/requires.txt
+EQL.egg-info/top_level.txt

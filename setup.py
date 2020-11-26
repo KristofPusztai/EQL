@@ -7,7 +7,7 @@ setuptools.setup(
     name="EQL", # Replace with your own username
     version="0.0.4",
     author="Kristof Pusztai",
-    author_email="kpusztai@berkeley.edu",
+    author_email="kristofp12@gmail.com",
     description="An implementation of Equation Learning Based Neural Network Model",
     long_description=long_description,
     long_description_content_type="text/markdown",

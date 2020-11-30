@@ -5,3 +5,6 @@ A tensorflow implementation of the Equation Learner Neural Network based model:
 - https://arxiv.org/pdf/1610.02995.pdf
 
 # Functionality:
+
+    pip install EQL
+    

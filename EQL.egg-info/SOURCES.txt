@@ -1,9 +1,8 @@
-README.md
+MANIFEST.in
 setup.py
 EQL/__init__.py
 EQL/layer.py
 EQL/model.py
-EQL/tests.py
 EQL.egg-info/PKG-INFO
 EQL.egg-info/SOURCES.txt
 EQL.egg-info/dependency_links.txt

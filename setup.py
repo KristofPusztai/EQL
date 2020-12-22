@@ -4,11 +4,11 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="EQL", # Replace with your own username
-    version="0.0.5",
+    name="EQL",
+    version="0.0.6",
     author="Kristof Pusztai",
-    author_email="kristofp12@gmail.com",
-    description="An implementation of Equation Learning Based Neural Network Model",
+    author_email="kpusztai@berkeley.edu",
+    description="A Tensorflow implementation of the Equation Learning Based Neural Network Model",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/KristofPusztai/EQL",

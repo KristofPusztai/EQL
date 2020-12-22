@@ -5,6 +5,8 @@ from tensorflow.keras import layers
 from EQL.layer import EqlLayer
 
 
+# TODO: Add regularization
+
 class EQL:
     def __init__(self, num_layers=2, dim=1):
         self.b_init = tf.zeros_initializer()
@@ -12,15 +14,11 @@ class EQL:
         self.num_layers = num_layers
         self.model = None
         self.dim = dim
-        self.w = None
-        self.b = None
 
-    def __build_and_compile_model(self, loss, metrics, loss_weights,
-                                  weighted_metrics, run_eagerly):
+    def build_and_compile_model(self, metrics=None, loss_weights=None, weighted_metrics=None,
+                                run_eagerly=None, kernel_regularizer=None):
         total_layers = []
-        init_layer = EqlLayer(self.w, self.b)
-        total_layers.append(init_layer)
-        for i in range(self.num_layers - 1):
+        for i in range(self.num_layers):
             bias = {
                 'b1': tf.Variable(self.b_init(shape=(1,)), name='bias_hidden1'),
                 'b2': tf.Variable(self.b_init(shape=(1,)), name='bias_hidden2'),
@@ -30,28 +28,6 @@ class EQL:
                 'b6': tf.Variable(self.b_init(shape=(1,)), name='bias_hidden6'),
             }
             weights = {
-                'h1': tf.Variable(self.w_init(shape=(5, 1)), name='w_hidden1'),
-                'h2': tf.Variable(self.w_init(shape=(5, 1)), name='w_hidden2'),
-                'h3': tf.Variable(self.w_init(shape=(5, 1)), name='w_hidden3'),
-                'h4': tf.Variable(self.w_init(shape=(5, 1)), name='w_hidden4'),
-                'h5': tf.Variable(self.w_init(shape=(5, 1)), name='w_hidden5'),
-                'h6': tf.Variable(self.w_init(shape=(5, 1)), name='w_hidden6'),
-            }
-            layer = EqlLayer(weights, bias)
-            total_layers.append(layer)
-
-        total_layers.append(layers.Dense(1, name='output'))
-        model = keras.Sequential(total_layers)
-
-        model.compile(loss=loss, optimizer=tf.keras.optimizers.Adam(0.001), metrics=metrics, loss_weights=loss_weights,
-                      weighted_metrics=weighted_metrics, run_eagerly=run_eagerly)
-        return model
-
-    def fit(self, x, y, weights=None, biases=None, epochs=100, verbose=0, validation_split=0.2,
-            loss=tf.keras.losses.MeanSquaredError(), metrics=None, loss_weights=None, weighted_metrics=None,
-            run_eagerly=None):
-        if weights is None:
-            self.w = {
                 'h1': tf.Variable(self.w_init(shape=(self.dim, 1)), name='w_hidden1'),
                 'h2': tf.Variable(self.w_init(shape=(self.dim, 1)), name='w_hidden2'),
                 'h3': tf.Variable(self.w_init(shape=(self.dim, 1)), name='w_hidden3'),
@@ -59,42 +35,29 @@ class EQL:
                 'h5': tf.Variable(self.w_init(shape=(self.dim, 1)), name='w_hidden5'),
                 'h6': tf.Variable(self.w_init(shape=(self.dim, 1)), name='w_hidden6'),
             }
-            self.b = {
-                'b1': tf.Variable(self.b_init(shape=(1,)), name='bias_hidden1'),
-                'b2': tf.Variable(self.b_init(shape=(1,)), name='bias_hidden2'),
-                'b3': tf.Variable(self.b_init(shape=(1,)), name='bias_hidden3'),
-                'b4': tf.Variable(self.b_init(shape=(1,)), name='bias_hidden4'),
-                'b5': tf.Variable(self.b_init(shape=(1,)), name='bias_hidden5'),
-                'b6': tf.Variable(self.b_init(shape=(1,)), name='bias_hidden6'),
-            }
-        else:
-            self.w = weights
-            self.b = biases
-        assert type(self.w) == dict, 'specified weights are incorrect, must be a dictionary of form:\n' \
-                                     'biases = {\n' \
-                                     "\t'h1': tensor(shape=(input_dim,1)), name='w_hidden1'),\n" \
-                                     "\t'h2': tensor(shape=(input_dim,1)), name='w_hidden2'),\n" \
-                                     "\t'h3': tensor(shape=(input_dim,1)), name='w_hidden3'),\n" \
-                                     "\t'h4': tensor(shape=(input_dim,1)), name='w_hidden4'),\n" \
-                                     "\t'h5': tensor(shape=(input_dim,1)), name='w_hidden5'),\n" \
-                                     "\t'h6': tensor(shape=(input_dim,1)), name='w_hidden6'),\n" \
-                                     '}'
-        assert type(self.b) == dict, 'specified biases are incorrect, must be a dictionary of form:\n' \
-                                     'biases = {\n' \
-                                     "\t'b1': tensor(shape=(1,)), name='bias_hidden1'),\n" \
-                                     "\t'b2': tensor(shape=(1,)), name='bias_hidden2'),\n" \
-                                     "\t'b3': tensor(shape=(1,)), name='bias_hidden3'),\n" \
-                                     "\t'b4': tensor(shape=(1,)), name='bias_hidden4'),\n" \
-                                     "\t'b5': tensor(shape=(1,)), name='bias_hidden5'),\n" \
-                                     "\t'b6': tensor(shape=(1,)), name='bias_hidden6'),\n" \
-                                     '}'
-        self.model = self.__build_and_compile_model(loss=loss, metrics=metrics, loss_weights=loss_weights,
-                                                    weighted_metrics=weighted_metrics, run_eagerly=run_eagerly)
-        self.model.fit(x, y, epochs=epochs,
-                       # suppress logging
-                       verbose=verbose,
-                       # Calculate validation results on 20% of the training data
-                       validation_split=validation_split)
+            layer = EqlLayer(weights, bias, kernel_regularizer)
+            total_layers.append(layer)
+
+        total_layers.append(layers.Dense(1, name='output'))
+        model = keras.Sequential(total_layers)
+
+        model.compile(loss=tf.keras.losses.MeanSquaredError(), optimizer=tf.keras.optimizers.Adam(0.001),
+                      metrics=metrics, loss_weights=loss_weights,
+                      weighted_metrics=weighted_metrics, run_eagerly=run_eagerly)
+        self.model = model
+
+    def fit(self, x, y, batch_size=None, epochs=100, verbose=0, callbacks=None,
+            validation_split=0.0, validation_data=None, shuffle=True, class_weight=None,
+            sample_weight=None, initial_epoch=0, steps_per_epoch=None,
+            validation_steps=None, validation_batch_size=None, validation_freq=1,
+            max_queue_size=10, workers=1, use_multiprocessing=False, t1=None, t2=None):
+        assert self.model is not None, 'Must call build_and_compile method model before training'
+        # TODO: Implement t1, t2 l1 reg.
+        self.model.fit(x, y, batch_size, epochs, verbose, callbacks,
+                       validation_split, validation_data, shuffle, class_weight,
+                       sample_weight, initial_epoch, steps_per_epoch,
+                       validation_steps, validation_batch_size, validation_freq,
+                       max_queue_size, workers, use_multiprocessing)
 
     def predict(self, x, batch_size=None, verbose=0, steps=None, callbacks=None, max_queue_size=10,
                 workers=1, use_multiprocessing=False):
@@ -107,6 +70,12 @@ class EQL:
 
     def count_params(self):
         return self.model.count_params()
+
+    def get_weights(self, layer):
+        return self.model.layers[layer].get_weights()
+
+    def set_weights(self, layer, weights):
+        self.model.layers[layer].set_weights(weights)
 
     def evaluate(self, x=None, y=None, batch_size=None, verbose=1, sample_weight=None, steps=None,
                  callbacks=None, max_queue_size=10, workers=1, use_multiprocessing=False,

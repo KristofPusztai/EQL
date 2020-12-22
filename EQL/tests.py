@@ -64,6 +64,7 @@ def test3():  # Tests model dimensionality as a whole
     test = EQL(dim=5)
     x = tf.ones((100, 5))
     y = tf.random_normal_initializer()(shape=(100, 1))
+    test.build_and_compile_model()
     test.fit(x, y)
     params = test.count_params()
     assert params == 78, 'trainable parameter count is wrong'

@@ -16,7 +16,7 @@ class EqlLayer(keras.layers.Layer):
             trainable=True, regularizer=self.regularizer
         )
         self.b = self.add_weight(
-            shape=(6,), initializer=self.initializer, trainable=True
+            shape=(6,), initializer=self.initializer, trainable=True, regularizer=self.regularizer
         )
 
     def call(self, inputs):
@@ -35,18 +35,19 @@ class EqlLayer(keras.layers.Layer):
 
 
 class DenseLayer(keras.layers.Layer):
-    def __init__(self, initializer='random_normal'):
+    def __init__(self, regularizer = None, initializer='random_normal'):
         super(DenseLayer, self).__init__()
         self.initializer = initializer
+        self.regularizer = regularizers.get(regularizer)
 
     def build(self, input_shape):
         self.w = self.add_weight(
             shape=(5, 1),
             initializer=self.initializer,
-            trainable=True
+            trainable=True, regularizer=self.regularizer
         )
         self.b = self.add_weight(
-            shape=(1,), initializer=self.initializer, trainable=True
+            shape=(1,), initializer=self.initializer, trainable=True, regularizer=self.regularizer
         )
 
     def call(self, inputs):

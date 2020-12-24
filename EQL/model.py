@@ -7,19 +7,19 @@ from EQL.layer import EqlLayer, DenseLayer
 
 # TODO: Add regularization
 class EQL:
-    def __init__(self, num_layers=2, dim=1, metrics=None, loss_weights=None, weighted_metrics=None,
-                 run_eagerly=None, optimizer=tf.keras.optimizers.Adam(0.001)):
+    def __init__(self, num_layers=2, dim=1):
         self.num_layers = num_layers
         self.model = None
         self.dim = dim
 
+    def build_and_compile_model(self, metrics=None, loss_weights=None, weighted_metrics=None,
+                                run_eagerly=None, optimizer=tf.keras.optimizers.Adam(0.001)):
         self.metrics = metrics
         self.loss_weights = loss_weights
         self.weighted_metrics = weighted_metrics
         self.run_eagerly = run_eagerly
         self.optimizer = optimizer
 
-    def build_and_compile_model(self):
         inputs = tf.keras.Input(shape=(self.dim,))
         x = inputs
         for i in range(self.num_layers):
@@ -33,33 +33,61 @@ class EQL:
                       weighted_metrics=self.weighted_metrics, run_eagerly=self.run_eagerly)
         self.model = model
 
-    def __rebuild(self, weights, biases, l0=False, lmbda=0):
-        total_layers = []
+    def __rebuild(self, weights, biases, lmbda, l0=False):
+        inputs = tf.keras.Input(shape=(self.dim,))
+        x = inputs
         for i in range(self.num_layers):
-            layer = EqlLayer()
-            total_layers.append(layer)
-        total_layers.append(layers.Dense(1, name='output'))
-        model = keras.Sequential(total_layers)
+            w_initializer = tf.constant_initializer(weights[i])
+            b_initializer = tf.constant_initializer(biases[i])
+            x = EqlLayer(lmbda, w_initializer=w_initializer, b_initializer=b_initializer)(x)
+        out_layer = DenseLayer(lmbda)
+        outputs = out_layer(x)
+        model = keras.Model(inputs, outputs)
 
         model.compile(loss=tf.keras.losses.MeanSquaredError(), optimizer=self.optimizer,
                       metrics=self.metrics, loss_weights=self.loss_weights,
                       weighted_metrics=self.weighted_metrics, run_eagerly=self.run_eagerly)
         self.model = model
 
-    def fit(self, x, y, batch_size=None, t0=100, t1=0, t2=0, verbose=0, callbacks=None,
+    def fit(self, x, y, lmbda, t0=100, t1=0, t2=0, verbose=0, batch_size=None, callbacks=None,
             validation_split=0.0, validation_data=None, shuffle=True, class_weight=None,
             sample_weight=None, initial_epoch=0, steps_per_epoch=None,
             validation_steps=None, validation_batch_size=None, validation_freq=1,
             max_queue_size=10, workers=1, use_multiprocessing=False):
         assert self.model is not None, 'Must call build_and_compile method model before training'
+        print('Beginning Training, T0_epochs = ' + str(t0))
         self.model.fit(x, y, batch_size, t0, verbose, callbacks,
                        validation_split, validation_data, shuffle, class_weight,
                        sample_weight, initial_epoch, steps_per_epoch,
                        validation_steps, validation_batch_size, validation_freq,
                        max_queue_size, workers, use_multiprocessing)
         # TODO: Implement t1, t2 l1 reg.
-        # if t1 != 0:
-        # if t2 != 0:
+        if t1 != 0:
+            weights = []
+            biases = []
+            for i in range(1, self.num_layers + 1):
+                weights.append(self.get_weights(i)[0])
+                biases.append(self.get_weights(i)[1])
+            self.__rebuild(weights, biases, lmbda=lmbda)
+            print('Beginning LASSO Training, T1_epochs = ' + str(t1))
+            self.model.fit(x, y, batch_size, t1, verbose, callbacks,
+                           validation_split, validation_data, shuffle, class_weight,
+                           sample_weight, initial_epoch, steps_per_epoch,
+                           validation_steps, validation_batch_size, validation_freq,
+                           max_queue_size, workers, use_multiprocessing)
+        if t2 != 0:
+            weights = []
+            biases = []
+            for i in range(1, self.num_layers + 1):
+                weights.append(self.get_weights(i)[0])
+                biases.append(self.get_weights(i)[1])
+            self.__rebuild(weights, biases, l0=True, lmbda=0)
+            print('Beginning L0 Training, T2_epochs = ' + str(t2))
+            self.model.fit(x, y, batch_size, t2, verbose, callbacks,
+                           validation_split, validation_data, shuffle, class_weight,
+                           sample_weight, initial_epoch, steps_per_epoch,
+                           validation_steps, validation_batch_size, validation_freq,
+                           max_queue_size, workers, use_multiprocessing)
 
     def predict(self, x, batch_size=None, verbose=0, steps=None, callbacks=None, max_queue_size=10,
                 workers=1, use_multiprocessing=False):

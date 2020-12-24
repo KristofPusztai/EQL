@@ -4,19 +4,20 @@ from tensorflow.keras import regularizers, initializers
 
 
 class EqlLayer(keras.layers.Layer):
-    def __init__(self, regularizer = None, initializer='random_normal'):
+    def __init__(self, lmbda=0, w_initializer='random_normal', b_initializer='random_normal'):
         super(EqlLayer, self).__init__()
-        self.regularizer = regularizers.get(regularizer)
-        self.initializer = initializers.get(initializer)
+        self.regularizer = regularizers.L1(l1=lmbda)
+        self.w_initializer = initializers.get(w_initializer)
+        self.b_initializer = initializers.get(b_initializer)
 
     def build(self, input_shape):
         self.w = self.add_weight(
             shape=(input_shape[-1], 6),
-            initializer=self.initializer,
+            initializer=self.w_initializer,
             trainable=True, regularizer=self.regularizer
         )
         self.b = self.add_weight(
-            shape=(6,), initializer=self.initializer, trainable=True, regularizer=self.regularizer
+            shape=(6,), initializer=self.b_initializer, trainable=True, regularizer=self.regularizer
         )
 
     def call(self, inputs):
@@ -35,19 +36,20 @@ class EqlLayer(keras.layers.Layer):
 
 
 class DenseLayer(keras.layers.Layer):
-    def __init__(self, regularizer = None, initializer='random_normal'):
+    def __init__(self, lmbda=0, w_initializer='random_normal', b_initializer='random_normal'):
         super(DenseLayer, self).__init__()
-        self.initializer = initializer
-        self.regularizer = regularizers.get(regularizer)
+        self.regularizer = regularizers.L1(l1=lmbda)
+        self.w_initializer = initializers.get(w_initializer)
+        self.b_initializer = initializers.get(b_initializer)
 
     def build(self, input_shape):
         self.w = self.add_weight(
             shape=(5, 1),
-            initializer=self.initializer,
+            initializer=self.w_initializer,
             trainable=True, regularizer=self.regularizer
         )
         self.b = self.add_weight(
-            shape=(1,), initializer=self.initializer, trainable=True, regularizer=self.regularizer
+            shape=(1,), initializer=self.b_initializer, trainable=True, regularizer=self.regularizer
         )
 
     def call(self, inputs):

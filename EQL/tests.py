@@ -33,7 +33,7 @@ def test4():  # Tests model dimensionality as a whole
     x = tf.ones((100, 2))
     y = tf.random_normal_initializer()(shape=(100, 1))
     test.build_and_compile_model()
-    test.fit(x, y)
+    test.fit(x, y, 0)
     params = test.count_params()
     assert params == 60, 'trainable parameter count is wrong'
     print('test4 successful')

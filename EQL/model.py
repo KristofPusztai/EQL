@@ -1,7 +1,7 @@
 import tensorflow as tf
 
 from tensorflow import keras
-from tensorflow.keras import layers
+import numpy as np
 from EQL.layer import EqlLayer, DenseLayer
 
 
@@ -11,6 +11,19 @@ class EQL:
         self.num_layers = num_layers
         self.model = None
         self.dim = dim
+
+    def replace_w_near_zero(self, data):
+        for d in range(len(data)):
+            for i in range(len(data[d])):
+                if np.isclose(data[d][i], 0, atol=self.atol):
+                    data[d][i] = 1
+        return data
+
+    def replace_b_near_zero(self, data):
+        for i in range(len(data)):
+            if np.isclose(data[i], 0, atol=self.atol):
+                data[i] = 1
+        return data
 
     def build_and_compile_model(self, metrics=None, loss_weights=None, weighted_metrics=None,
                                 run_eagerly=None, optimizer=tf.keras.optimizers.Adam(0.001)):
@@ -40,7 +53,9 @@ class EQL:
             w_initializer = tf.constant_initializer(weights[i])
             b_initializer = tf.constant_initializer(biases[i])
             x = EqlLayer(lmbda, w_initializer=w_initializer, b_initializer=b_initializer)(x)
-        out_layer = DenseLayer(lmbda)
+        w_initializer = tf.constant_initializer(weights[self.num_layers])
+        b_initializer = tf.constant_initializer(biases[self.num_layers])
+        out_layer = DenseLayer(lmbda, w_initializer=w_initializer, b_initializer=b_initializer)
         outputs = out_layer(x)
         model = keras.Model(inputs, outputs)
 
@@ -53,9 +68,11 @@ class EQL:
             validation_split=0.0, validation_data=None, shuffle=True, class_weight=None,
             sample_weight=None, initial_epoch=0, steps_per_epoch=None,
             validation_steps=None, validation_batch_size=None, validation_freq=1,
-            max_queue_size=10, workers=1, use_multiprocessing=False):
+            max_queue_size=10, workers=1, use_multiprocessing=False, atol=0.01):
+        self.atol=atol
         assert self.model is not None, 'Must call build_and_compile method model before training'
-        print('Beginning Training, T0_epochs = ' + str(t0))
+        if verbose != 0:
+            print('Beginning Training, T0_epochs = ' + str(t0))
         self.model.fit(x, y, batch_size, t0, verbose, callbacks,
                        validation_split, validation_data, shuffle, class_weight,
                        sample_weight, initial_epoch, steps_per_epoch,
@@ -69,7 +86,8 @@ class EQL:
                 weights.append(self.get_weights(i)[0])
                 biases.append(self.get_weights(i)[1])
             self.__rebuild(weights, biases, lmbda=lmbda)
-            print('Beginning LASSO Training, T1_epochs = ' + str(t1))
+            if verbose != 0:
+                print('Beginning LASSO Training, T1_epochs = ' + str(t1))
             self.model.fit(x, y, batch_size, t1, verbose, callbacks,
                            validation_split, validation_data, shuffle, class_weight,
                            sample_weight, initial_epoch, steps_per_epoch,
@@ -79,10 +97,13 @@ class EQL:
             weights = []
             biases = []
             for i in range(1, self.num_layers + 1):
-                weights.append(self.get_weights(i)[0])
-                biases.append(self.get_weights(i)[1])
+                w = self.replace_w_near_zero(self.get_weights(i)[0])
+                weights.append(w)
+                b = self.replace_b_near_zero(self.get_weights(i)[1])
+                biases.append(b)
             self.__rebuild(weights, biases, l0=True, lmbda=0)
-            print('Beginning L0 Training, T2_epochs = ' + str(t2))
+            if verbose != 0:
+                print('Beginning L0 Training, T2_epochs = ' + str(t2))
             self.model.fit(x, y, batch_size, t2, verbose, callbacks,
                            validation_split, validation_data, shuffle, class_weight,
                            sample_weight, initial_epoch, steps_per_epoch,

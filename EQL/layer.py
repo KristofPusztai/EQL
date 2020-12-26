@@ -4,11 +4,12 @@ from tensorflow.keras import regularizers, initializers
 
 
 class EqlLayer(keras.layers.Layer):
-    def __init__(self, lmbda=0, w_initializer='random_normal', b_initializer='random_normal'):
+    def __init__(self, lmbda=0, w_initializer='random_normal', b_initializer='random_normal', mask=None):
         super(EqlLayer, self).__init__()
         self.regularizer = regularizers.L1(l1=lmbda)
         self.w_initializer = initializers.get(w_initializer)
         self.b_initializer = initializers.get(b_initializer)
+        self.mask=mask
 
     def build(self, input_shape):
         self.w = self.add_weight(
@@ -19,6 +20,12 @@ class EqlLayer(keras.layers.Layer):
         self.b = self.add_weight(
             shape=(6,), initializer=self.b_initializer, trainable=True, regularizer=self.regularizer
         )
+        if self.mask:
+            for i in range(self.w.shape[0]):
+                w_mask = tf.matmul([self.w[i]], self.mask[0][i])[0]
+                self.w[i].assign(w_mask)
+            b_mask = tf.matmul([self.b], self.mask[1])[0]
+            self.b.assign(b_mask)
 
     def call(self, inputs):
         out = tf.matmul(inputs, self.w) + self.b
@@ -36,11 +43,12 @@ class EqlLayer(keras.layers.Layer):
 
 
 class DenseLayer(keras.layers.Layer):
-    def __init__(self, lmbda=0, w_initializer='random_normal', b_initializer='random_normal'):
+    def __init__(self, lmbda=0, w_initializer='random_normal', b_initializer='random_normal', mask=None):
         super(DenseLayer, self).__init__()
         self.regularizer = regularizers.L1(l1=lmbda)
         self.w_initializer = initializers.get(w_initializer)
         self.b_initializer = initializers.get(b_initializer)
+        self.mask = mask
 
     def build(self, input_shape):
         self.w = self.add_weight(
@@ -51,6 +59,12 @@ class DenseLayer(keras.layers.Layer):
         self.b = self.add_weight(
             shape=(1,), initializer=self.b_initializer, trainable=True, regularizer=self.regularizer
         )
+        if self.mask:
+            for i in range(self.w.shape[0]):
+                w_mask = tf.matmul([self.w[i]], self.mask[0][i])[0]
+                self.w[i].assign(w_mask)
+            b_mask = tf.matmul([self.b], self.mask[1])[0]
+            self.b.assign(b_mask)
 
     def call(self, inputs):
         out = tf.matmul(inputs, self.w) + self.b

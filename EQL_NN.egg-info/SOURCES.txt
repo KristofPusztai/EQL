@@ -1,0 +1,12 @@
+LICENSE
+MANIFEST.in
+README.md
+setup.py
+EQL/__init__.py
+EQL/layer.py
+EQL/model.py
+EQL_NN.egg-info/PKG-INFO
+EQL_NN.egg-info/SOURCES.txt
+EQL_NN.egg-info/dependency_links.txt
+EQL_NN.egg-info/requires.txt
+EQL_NN.egg-info/top_level.txt

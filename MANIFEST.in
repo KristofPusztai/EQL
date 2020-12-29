@@ -1,1 +1,3 @@
 exclude EQL/tests.py
+include README.md
+include LICENSE

@@ -1,11 +1,11 @@
 import setuptools
 
-with open("README.MD", "r") as fh:
+with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="EQL",
-    version="0.0.6",
+    name="EQL_NN",
+    version="0.0.8",
     author="Kristof Pusztai",
     author_email="kpusztai@berkeley.edu",
     description="A Tensorflow implementation of the Equation Learning Based Neural Network Model",

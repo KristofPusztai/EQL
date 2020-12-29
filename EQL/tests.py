@@ -97,8 +97,32 @@ def test5():  # Tests model dimensionality as a whole
     print('test5 successful')
 
 
+def test6():  # Tests l1 regularization
+    test = EQL(dim=2)
+    x = tf.ones((100, 2))
+    y = tf.random_normal_initializer()(shape=(100, 1))
+    test.build_and_compile_model()
+    test.fit(x, y, 0.01, t1=1)
+    params = test.count_params()
+    assert params == 60, 'trainable parameter count is wrong'
+    print('test6 successful')
+
+
+def test7():    # Tests l0 regularization
+    test = EQL(dim=2)
+    x = tf.ones((100, 2))
+    y = tf.random_normal_initializer()(shape=(100, 1))
+    test.build_and_compile_model()
+    test.fit(x, y, 0.01, t1=1, t2=1)
+    params = test.count_params()
+    assert params == 60, 'trainable parameter count is wrong'
+    print('test7 successful')
+
+
 test1()
 test2()
 test3()
 test4()
 test5()
+test6()
+test7()

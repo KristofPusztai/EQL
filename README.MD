@@ -5,11 +5,18 @@ A tensorflow implementation of the Equation Learner Neural Network based model:
 - https://arxiv.org/pdf/1610.02995.pdf
 
 # Functionality:
-Installation:
+### Installation:
+pip:
 
     pip install EQL
+or from github:
     
-Creating and training a model:
+    git clone https://github.com/KristofPusztai/EQL.git
+Navigate to cloned directory and run setup.py
+    
+    sudo python setup.py install
+
+### Creating and training a model:
 
     from EQL.model import EQL
     EQLmodel = EQL(num_layers = 2, dim=5)
@@ -19,19 +26,21 @@ Creating and training a model:
     EQLmodel.build_and_compile(self, metrics=None, loss_weights=None, weighted_metrics=None,
                                run_eagerly=None, kernel_regularizer=None)
                                
-    EQLmodel.fit(x, y, weights=None, biases=None, epochs=100, verbose=0, validation_split=0.2,
-                 loss=tf.keras.losses.MeanSquaredError(), metrics=None, loss_weights=None, weighted_metrics=None,
-                 run_eagerly=None, steps_per_execution=None)
+    EQLmodel.fit(x, y, lmbda, t0=100, t1=0, t2=0, initial_epoch=0, verbose=0, batch_size=None, callbacks=None,
+            validation_split=0.0, validation_data=None, shuffle=True, class_weight=None,
+            sample_weight=None, steps_per_epoch=None,
+            validation_steps=None, validation_batch_size=None, validation_freq=1,
+            max_queue_size=10, workers=1, use_multiprocessing=False, atol=0.01)
     
-Prediction:
+### Prediction:
     
     EQLmodel.predict(x, batch_size=None, verbose=0, steps=None, 
                      callbacks=None, max_queue_size=10,
                      workers=1, use_multiprocessing=False)
     
-Note: use tensor input for maximum computational efficiency
+<u>Note: use tensor input for maximum computational efficiency</u>
 
-Model Information:
+### Model Information:
 
     EQLmodel.summary() # Provides tensorflow summary
     EQLmodel.count_params() # Provides # trainable params

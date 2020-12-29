@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: EQL-NN
-Version: 0.0.9
+Version: 0.0.91
 Summary: A Tensorflow implementation of the Equation Learning Based Neural Network Model
 Home-page: https://github.com/KristofPusztai/EQL
 Author: Kristof Pusztai
@@ -27,7 +27,7 @@ Description: # Introduction:
         ### Creating and training a model:
         
             from EQL.model import EQL
-            EQLmodel = EQL(num_layers = 2, dim=5)
+            EQLmodel = EQL(num_layers = 2, dim=5) # num_layers -> hidden_layers, dim -> dimension of input
             x = tf.random_normal_initializer()(shape=(100, 5))
             y = tf.random_normal_initializer()(shape=(100, 1))
             

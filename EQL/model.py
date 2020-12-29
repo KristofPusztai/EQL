@@ -33,7 +33,7 @@ class EQL:
         for d in range(len(data)):
             for i in range(len(data[d])):
                 if np.isclose(data[d][i], 0, atol=self.atol):
-                    data[d][i] = 1
+                    data[d][i] = 0
         return data
 
     def __replace_b_near_zero(self, data):
@@ -45,7 +45,7 @@ class EQL:
         """
         for i in range(len(data)):
             if np.isclose(data[i], 0, atol=self.atol):
-                data[i] = 1
+                data[i] = 0
         return data
 
     def __build_mask(self, weights, biases):

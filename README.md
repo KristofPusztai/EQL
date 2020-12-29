@@ -19,7 +19,7 @@ Navigate to cloned directory and run setup.py
 ### Creating and training a model:
 
     from EQL.model import EQL
-    EQLmodel = EQL(num_layers = 2, dim=5)
+    EQLmodel = EQL(num_layers = 2, dim=5) # num_layers -> hidden_layers, dim -> dimension of input
     x = tf.random_normal_initializer()(shape=(100, 5))
     y = tf.random_normal_initializer()(shape=(100, 1))
     

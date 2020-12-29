@@ -20,14 +20,14 @@ class EqlLayer(keras.layers.Layer):
         self.b = self.add_weight(
             shape=(6,), initializer=self.b_initializer, trainable=True, regularizer=self.regularizer
         )
+
+    def call(self, inputs):
         if self.mask:
             for i in range(self.w.shape[0]):
                 w_mask = tf.matmul([self.w[i]], self.mask[0][i])[0]
                 self.w[i].assign(w_mask)
             b_mask = tf.matmul([self.b], self.mask[1])[0]
             self.b.assign(b_mask)
-
-    def call(self, inputs):
         out = tf.matmul(inputs, self.w) + self.b
         identity = tf.identity(tf.gather(out, [0], axis=1), name='identity_output')
         sin = tf.sin(tf.gather(out, [1], axis=1), name='sin_output')
@@ -59,13 +59,13 @@ class DenseLayer(keras.layers.Layer):
         self.b = self.add_weight(
             shape=(1,), initializer=self.b_initializer, trainable=True, regularizer=self.regularizer
         )
+
+    def call(self, inputs):
         if self.mask:
             for i in range(self.w.shape[0]):
                 w_mask = tf.matmul([self.w[i]], self.mask[0][i])[0]
                 self.w[i].assign(w_mask)
             b_mask = tf.matmul([self.b], self.mask[1])[0]
             self.b.assign(b_mask)
-
-    def call(self, inputs):
         out = tf.matmul(inputs, self.w) + self.b
         return out

@@ -9,7 +9,7 @@ class EqlLayer(keras.layers.Layer):
         self.regularizer = regularizers.L1(l1=lmbda)
         self.w_initializer = initializers.get(w_initializer)
         self.b_initializer = initializers.get(b_initializer)
-        self.mask=mask
+        self.mask = mask
 
     def build(self, input_shape):
         self.w = self.add_weight(

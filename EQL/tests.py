@@ -76,7 +76,7 @@ def test4():  # Tests masking output for layers
          [0, 0, 0, 0, 0, 1]]
     ]
     linear_layer = EqlLayer(mask=mask)
-    y = linear_layer(x)  # necessary to initialize weights
+    linear_layer(x)  # necessary to initialize weights
     weights = linear_layer.get_weights()
     _1 = weights[0][0]
     _2 = weights[0][1]

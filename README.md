@@ -38,9 +38,11 @@ Navigate to cloned directory and run setup.py
                      callbacks=None, max_queue_size=10,
                      workers=1, use_multiprocessing=False)
     
-<u>Note: use tensor input for maximum computational efficiency</u>
+Note: use tensor input for maximum computational efficiency
 
 ### Model Information:
+There are a variety of methods for understanding what is going on
+in your model.
 
     EQLmodel.summary() # Provides tensorflow summary
     EQLmodel.count_params() # Provides # trainable params

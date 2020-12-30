@@ -80,7 +80,7 @@ class EQL:
         mask.append(weight_masks)
         mask.append(b_mask)
         return mask
-
+    #TODO: Add customizable weight initialization
     def build_and_compile_model(self, metrics=None, loss_weights=None, weighted_metrics=None,
                                 run_eagerly=None, optimizer=tf.keras.optimizers.Adam(0.001)):
         """
@@ -124,7 +124,7 @@ class EQL:
         :param biases: Biases from previous training
         :type biases: list
         :param lmbda: l1 regularizer parameter
-        :type lmbda: int
+        :type lmbda: float
         :param l0: Determines whether function is in l0 state
         :type l0: bool
         """
@@ -135,16 +135,16 @@ class EQL:
             b_initializer = tf.constant_initializer(biases[i])
             if l0:
                 mask = self.__build_mask(weights[i], biases[i])
-                x = EqlLayer(lmbda, w_initializer, b_initializer, mask)(x)
+                x = EqlLayer(lmbda=lmbda, w_initializer=w_initializer, b_initializer=b_initializer, mask=mask)(x)
             else:
-                x = EqlLayer(lmbda, w_initializer, b_initializer)(x)
+                x = EqlLayer(lmbda=lmbda, w_initializer=w_initializer, b_initializer=b_initializer)(x)
         w_initializer = tf.constant_initializer(weights[self.num_layers])
         b_initializer = tf.constant_initializer(biases[self.num_layers])
         if l0:
             mask = self.__build_mask(weights[self.num_layers], biases[self.num_layers])
-            out_layer = DenseLayer(lmbda, w_initializer, b_initializer, mask)
+            out_layer = DenseLayer(lmbda=lmbda, w_initializer=w_initializer, b_initializer=b_initializer, mask=mask)
         else:
-            out_layer = DenseLayer(lmbda, w_initializer, b_initializer)
+            out_layer = DenseLayer(lmbda=lmbda, w_initializer=w_initializer, b_initializer=b_initializer)
         outputs = out_layer(x)
         model = keras.Model(inputs, outputs)
 
@@ -166,7 +166,7 @@ class EQL:
         :param y: Y data matrix, preferably tensor but can be an array type
         :type y: tf.Tensor
         :param lmbda: l1 regularizer
-        :type lmbda: int
+        :type lmbda: float
         :param t0: T0 epochs as specified in paper, no regularization
         :type t0: int
         :param t1: T1 epochs as specified in paper, l1 regularization
@@ -234,8 +234,8 @@ class EQL:
         :param validation_freq: Only relevant if validation data is provided. Integer or collections_abc.Container
             instance (e.g. list, tuple, etc.). If an integer, specifies how many training epochs to run before a new
             validation run is performed, e.g. validation_freq=2 runs validation every 2 epochs. If a Container,
-            specifies the epochs on which to run validation, e.g. validation_freq=[1, 2, 10] runs validation at the end of the
-            1st, 2nd, and 10th epochs.
+            specifies the epochs on which to run validation, e.g. validation_freq=[1, 2, 10] runs validation at the end
+            of the 1st, 2nd, and 10th epochs.
         :type validation_freq: int
         :param max_queue_size: Used for generator or keras.utils.Sequence input only. Maximum size for the generator
             queue. If unspecified, max_queue_size will default to 10.

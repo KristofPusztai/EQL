@@ -19,12 +19,13 @@ Navigate to cloned directory and run setup.py
 ### Creating and training a model:
 
     from EQL.model import EQL
-    EQLmodel = EQL(num_layers = 2, dim=5) # num_layers -> hidden_layers, dim -> dimension of input
+    EQLmodel = EQL(num_layers = 2, dim=5, v = [1,1]) # num_layers -> hidden_layers, dim -> dimension of input, v -> number of binary inputs
     x = tf.random_normal_initializer()(shape=(100, 5))
     y = tf.random_normal_initializer()(shape=(100, 1))
     
     EQLmodel.build_and_compile(self, metrics=None, loss_weights=None, weighted_metrics=None,
-                               run_eagerly=None, kernel_regularizer=None)
+                               run_eagerly=None, kernel_regularizer=None,
+                               w_init='random_normal', b_init='random_normal, exclude=None) # exclude specifies activation function exclusions in layers
                                
     EQLmodel.fit(x, y, lmbda, t0=100, t1=0, t2=0, initial_epoch=0, verbose=0, batch_size=None, callbacks=None,
             validation_split=0.0, validation_data=None, shuffle=True, class_weight=None,
@@ -55,3 +56,8 @@ in your model.
                       workers=1, use_multiprocessing=False,
                       return_dict=False)
     # Returns the loss value & metrics values for the model
+## Implementation Notes:
+Training regiment is interpretted as debiased LASSO:
+- T0 epochs are normal training, no regularization
+- T1 epochs are L1 regularized training, continuing where T0 ended
+- T2 epochs are L0 (weights with values close to 0, |w| < atol, are rounded to 0 and left untrained) regularized training, continuing from T1

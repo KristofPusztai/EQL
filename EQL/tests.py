@@ -6,7 +6,7 @@ from EQL.model import EQL
 
 def test1():  # Tests layer construction
     x = tf.ones((2, 2))
-    linear_layer = EqlLayer()
+    linear_layer = EqlLayer('random_normal', 'random_normal', v=1)
     y = linear_layer(x)
     assert y.shape == (2, 5), 'Wrong shape of output!'
     print('test1 successful')
@@ -14,7 +14,7 @@ def test1():  # Tests layer construction
 
 def test2():  # Tests layer dimension output
     x = tf.ones((10, 5))
-    linear_layer = EqlLayer()
+    linear_layer = EqlLayer('random_normal', 'random_normal', v=1)
     y = linear_layer(linear_layer(linear_layer(x)))
     assert y.shape == (10, 5), 'Wrong shape of output!'
     print('test2 successful')
@@ -22,7 +22,7 @@ def test2():  # Tests layer dimension output
 
 def test3():  # Tests custom DenseLayer implementation
     x = tf.ones((10, 5))
-    linear_layer = DenseLayer()
+    linear_layer = DenseLayer('random_normal', 'random_normal')
     y = linear_layer(x)
     assert y.shape == (10, 1), 'Wrong shape of output!'
     print('test3 successful')
@@ -75,7 +75,7 @@ def test4():  # Tests masking output for layers
          [0, 0, 0, 0, 1, 0],
          [0, 0, 0, 0, 0, 1]]
     ]
-    linear_layer = EqlLayer(mask=mask)
+    linear_layer = EqlLayer('random_normal', 'random_normal', mask=mask, v=1)
     linear_layer(x)  # necessary to initialize weights
     weights = linear_layer.get_weights()
     _1 = weights[0][0]
@@ -91,7 +91,7 @@ def test5():  # Tests model dimensionality as a whole
     x = tf.ones((100, 2))
     y = tf.random_normal_initializer()(shape=(100, 1))
     test.build_and_compile_model()
-    test.fit(x, y, 0)
+    test.fit(x, y, 0, 1)
     params = test.count_params()
     assert params == 60, 'trainable parameter count is wrong'
     print('test5 successful')
@@ -108,7 +108,7 @@ def test6():  # Tests l1 regularization
     print('test6 successful')
 
 
-def test7():    # Tests l0 regularization
+def test7():  # Tests l0 regularization
     test = EQL(dim=2)
     x = tf.ones((100, 2))
     y = tf.random_normal_initializer()(shape=(100, 1))
@@ -119,6 +119,41 @@ def test7():    # Tests l0 regularization
     print('test7 successful')
 
 
+def test8():  # Tests layer width parameter
+    x = tf.ones((2, 2))
+    linear_layer = EqlLayer('random_normal', 'random_normal', v=2)
+    y = linear_layer(x)
+    assert y.shape == (2, 10), 'Wrong shape of output!'
+    print('test8 successful')
+
+
+def test9():    # Tests layer width parameter in model
+    test = EQL(dim=2, v=[1, 2])
+    x = tf.ones((100, 2))
+    y = tf.random_normal_initializer()(shape=(100, 1))
+    test.build_and_compile_model()
+    test.fit(x, y, 0.01, t1=1, t2=1)
+    params = test.count_params()
+    assert params == 101, 'trainable parameter count is wrong'
+    print('test9 successful')
+
+
+def test10():   # Tests layer exclusion parameter
+    x = tf.ones((2, 2))
+    linear_layer = EqlLayer('random_normal', 'random_normal', v=2, exclude=['mult', 'sin'])
+    y = linear_layer(x)
+    assert y.shape == (2, 6), 'Wrong shape of output!'
+
+    test = EQL(dim=2, v=[1, 2])
+    x = tf.ones((100, 2))
+    y = tf.random_normal_initializer()(shape=(100, 1))
+    test.build_and_compile_model(exclude=[['sin','cos','sig','mult'], ['sin','cos','sig','mult']])
+    test.fit(x, y, 0.0, t0=1)
+    params = test.count_params()
+    assert params == 10, 'trainable parameter count is wrong'
+    print('test10 successful')
+
+
 test1()
 test2()
 test3()
@@ -126,3 +161,6 @@ test4()
 test5()
 test6()
 test7()
+test8()
+test9()
+test10()

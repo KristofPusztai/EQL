@@ -3,22 +3,67 @@ from tensorflow import keras
 from tensorflow.keras import regularizers, initializers
 
 
+def identity(out, index):
+    return tf.identity(tf.gather(out, [index], axis=1), name='identity_output')
+
+
+def sin(out, index):
+    return tf.sin(tf.gather(out, [index], axis=1), name='sin_output')
+
+
+def cos(out, index):
+    return tf.cos(tf.gather(out, [index], axis=1), name='cos_output')
+
+
+def sigmoid(out, index):
+    return tf.sigmoid(tf.gather(out, [index], axis=1), name='sig_output')
+
+
+def mult(out, index):
+    sum1 = tf.gather(out, [index], axis=1)
+    sum2 = tf.gather(out, [index + 1], axis=1)
+    sum_input = tf.add(sum1, sum2)
+    return tf.multiply(sum_input, sum_input, name='mult_output')
+
+
 class EqlLayer(keras.layers.Layer):
-    def __init__(self, lmbda=0, w_initializer='random_normal', b_initializer='random_normal', mask=None):
+    def __init__(self, w_initializer, b_initializer, v, lmbda=0, mask=None, exclude=None):
         super(EqlLayer, self).__init__()
+        if exclude is None:
+            exclude = []
         self.regularizer = regularizers.L1(l1=lmbda)
         self.w_initializer = initializers.get(w_initializer)
         self.b_initializer = initializers.get(b_initializer)
         self.mask = mask
+        self.v = v
+        self.activations = [identity, sin, cos, sigmoid, mult]
+
+        self.exclusion = 0
+        if 'id' in exclude:
+            self.exclusion += 1
+            self.activations.remove(identity)
+        if 'sin' in exclude:
+            self.exclusion += 1
+            self.activations.remove(sin)
+        if 'cos' in exclude:
+            self.exclusion += 1
+            self.activations.remove(cos)
+        if 'sig' in exclude:
+            self.exclusion += 1
+            self.activations.remove(sigmoid)
+        if 'mult' in exclude:
+            self.exclusion += 2
+            self.activations.remove(mult)
 
     def build(self, input_shape):
         self.w = self.add_weight(
-            shape=(input_shape[-1], 6),
+            shape=(input_shape[-1], 6 * self.v - self.v * self.exclusion),
             initializer=self.w_initializer,
             trainable=True, regularizer=self.regularizer
         )
         self.b = self.add_weight(
-            shape=(6,), initializer=self.b_initializer, trainable=True, regularizer=self.regularizer
+            shape=(6 * self.v - self.v * self.exclusion,), initializer=self.b_initializer,
+            trainable=True, regularizer=self.regularizer
         )
 
     def call(self, inputs):
@@ -28,22 +73,20 @@ class EqlLayer(keras.layers.Layer):
                 self.w[i].assign(w_mask)
             b_mask = tf.matmul([self.b], self.mask[1])[0]
             self.b.assign(b_mask)
-        out = tf.matmul(inputs, self.w) + self.b
-        identity = tf.identity(tf.gather(out, [0], axis=1), name='identity_output')
-        sin = tf.sin(tf.gather(out, [1], axis=1), name='sin_output')
-        cos = tf.cos(tf.gather(out, [2], axis=1), name='cos_output')
-        sigmoid = tf.sigmoid(tf.gather(out, [3], axis=1), name='sig_output')
-        sum1 = tf.gather(out, [4], axis=1)
-        sum2 = tf.gather(out, [5], axis=1)
-        sum_input = tf.add(sum1, sum2)
-        mult = tf.multiply(sum_input, sum_input, name='mult_output')
 
-        output = tf.concat([identity, sin, cos, sigmoid, mult], axis=1)
+        out = tf.matmul(inputs, self.w) + self.b
+        output_batches = []
+        for i in range(self.v):
+            v = (6 - self.exclusion) * i
+            for a in range(len(self.activations)):
+                activation = self.activations[a](out, a + v)
+                output_batches.append(activation)
+        output = tf.concat(output_batches, axis=1)
         return output
 
 
 class DenseLayer(keras.layers.Layer):
-    def __init__(self, lmbda=0, w_initializer='random_normal', b_initializer='random_normal', mask=None):
+    def __init__(self, w_initializer, b_initializer, lmbda=0, mask=None):
         super(DenseLayer, self).__init__()
         self.regularizer = regularizers.L1(l1=lmbda)
         self.w_initializer = initializers.get(w_initializer)
@@ -52,7 +95,7 @@ class DenseLayer(keras.layers.Layer):
 
     def build(self, input_shape):
         self.w = self.add_weight(
-            shape=(5, 1),
+            shape=(input_shape[-1], 1),
             initializer=self.w_initializer,
             trainable=True, regularizer=self.regularizer
         )

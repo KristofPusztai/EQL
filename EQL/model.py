@@ -10,7 +10,7 @@ class EQL:
     EQL model class, here we build our model and specify training processes and architecture
     """
 
-    def __init__(self, num_layers=2, dim=1):
+    def __init__(self, num_layers=2, dim=1, v=None):
         """
         EQL initializer
 
@@ -18,10 +18,16 @@ class EQL:
         :type num_layers: integer
         :param dim: Dimension of input
         :type dim: integer
+        :param v: Integer number of binary units in hidden layers, v = 1/4 * u, u -> unary units
+        :type v: list
         """
+        if v is None:
+            v = np.ones(num_layers, dtype=int)
         self.num_layers = num_layers
         self.model = None
         self.dim = dim
+        assert len(v) == self.num_layers, 'v array must have same dimensions as number of hidden layers param'
+        self.v = v
 
     def __replace_w_near_zero(self, data):
         """
@@ -80,9 +86,10 @@ class EQL:
         mask.append(weight_masks)
         mask.append(b_mask)
         return mask
-    #TODO: Add customizable weight initialization
+
     def build_and_compile_model(self, metrics=None, loss_weights=None, weighted_metrics=None,
-                                run_eagerly=None, optimizer=tf.keras.optimizers.Adam(0.001)):
+                                run_eagerly=None, optimizer=tf.keras.optimizers.Adam(0.001),
+                                w_init='random_normal', b_init='random_normal', exclude=None):
         """
         Configures the model for training.
 
@@ -95,20 +102,33 @@ class EQL:
         :param run_eagerly: Defaults to False. If True, this Model's logic will not be wrapped in a tf.function.
             Recommended to leave this as None unless your Model cannot be run inside a tf.function.
         :type run_eagerly: bool
-        :param optimizer:name of optimizer or optimizer instance. See tf.keras.optimizers.
+        :param optimizer: name of optimizer or optimizer instance. See tf.keras.optimizers.
         :type optimizer: tf.keras.optimizers
+        :param w_init: Initializer for weights in network, default is random normal distribution
+        :type w_init: str or tf.keras.initializers
+        :param b_init: Initializer for biases in network, default is random normal distribution
+        :type b_init: str or tf.keras.initializers
+        :param exclude: Exclude any activation functions in a layer, must be a multidimensional list of activation
+            function names: ['id','sin', 'cos','sig','mult']
+        :type exclude: list
         """
+        if exclude:
+            assert len(exclude) == self.num_layers, "exclude parameter wrong format, len(exclude) must equal " \
+                                                    "num_layers, ex.: exclude=[['sin'],[]], num_layers = 2"
+        else:
+            exclude = [[] for i in range(self.num_layers)]
         self.metrics = metrics
         self.loss_weights = loss_weights
         self.weighted_metrics = weighted_metrics
         self.run_eagerly = run_eagerly
         self.optimizer = optimizer
+        self.exclude = exclude
 
         inputs = tf.keras.Input(shape=(self.dim,))
         x = inputs
         for i in range(self.num_layers):
-            x = EqlLayer()(x)
-        out_layer = DenseLayer()
+            x = EqlLayer(w_initializer=w_init, b_initializer=b_init, v=self.v[i], exclude=self.exclude[i])(x)
+        out_layer = DenseLayer(w_initializer=w_init, b_initializer=b_init)
         outputs = out_layer(x)
         model = keras.Model(inputs, outputs)
 
@@ -135,9 +155,11 @@ class EQL:
             b_initializer = tf.constant_initializer(biases[i])
             if l0:
                 mask = self.__build_mask(weights[i], biases[i])
-                x = EqlLayer(lmbda=lmbda, w_initializer=w_initializer, b_initializer=b_initializer, mask=mask)(x)
+                x = EqlLayer(lmbda=lmbda, w_initializer=w_initializer, b_initializer=b_initializer,
+                             mask=mask, v=self.v[i], exclude=self.exclude[i])(x)
             else:
-                x = EqlLayer(lmbda=lmbda, w_initializer=w_initializer, b_initializer=b_initializer)(x)
+                x = EqlLayer(lmbda=lmbda, w_initializer=w_initializer, b_initializer=b_initializer,
+                             v=self.v[i], exclude=self.exclude[i])(x)
         w_initializer = tf.constant_initializer(weights[self.num_layers])
         b_initializer = tf.constant_initializer(biases[self.num_layers])
         if l0:

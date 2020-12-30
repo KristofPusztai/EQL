@@ -1,3 +1,4 @@
 exclude EQL/tests.py
+prune Jupyter Notebooks
 include README.md
 include LICENSE

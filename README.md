@@ -8,7 +8,7 @@ A tensorflow implementation of the Equation Learner Neural Network based model:
 ### Installation:
 pip:
 
-    pip install EQL
+    pip install EQL-NN
 or from github:
     
     git clone https://github.com/KristofPusztai/EQL.git

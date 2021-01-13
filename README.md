@@ -1,3 +1,4 @@
+![GitHub release (latest by date)](https://img.shields.io/github/v/release/KristofPusztai/EQL?style=plastic)
 # Introduction:
 
 A tensorflow implementation of the Equation Learner Neural Network based model:

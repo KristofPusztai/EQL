@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="EQL-NN",
-    version="1.9.3", # MAJOR.MINOR.MAINTENANCE
+    version="1.9.4", # MAJOR.MINOR.MAINTENANCE
     author="Kristof Pusztai",
     author_email="kpusztai@berkeley.edu",
     description="A Tensorflow implementation of the Equation Learning Based Neural Network Model",

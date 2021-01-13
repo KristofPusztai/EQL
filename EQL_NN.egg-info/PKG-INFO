@@ -1,12 +1,14 @@
 Metadata-Version: 2.1
 Name: EQL-NN
-Version: 1.9.4
+Version: 1.9.5
 Summary: A Tensorflow implementation of the Equation Learning Based Neural Network Model
 Home-page: https://github.com/KristofPusztai/EQL
 Author: Kristof Pusztai
 Author-email: kpusztai@berkeley.edu
 License: UNKNOWN
 Description: ![GitHub release (latest by date)](https://img.shields.io/github/v/release/KristofPusztai/EQL?style=plastic)
+        ![PyPI - License](https://img.shields.io/pypi/l/EQL-NN)
+        ![GitHub issues](https://img.shields.io/github/issues/KristofPusztai/EQL)
         # Introduction:
         
         A tensorflow implementation of the Equation Learner Neural Network based model:

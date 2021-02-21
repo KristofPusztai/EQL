@@ -59,6 +59,10 @@ in your model.
                       workers=1, use_multiprocessing=False,
                       return_dict=False)
     # Returns the loss value & metrics values for the model
+    
+Can also access the tensorflow model directly to use other TensorFlow functions such as saving:
+    
+    EQLmodel.model.save('path/to/save')
 ## Implementation Notes:
 Training regiment is interpretted as debiased LASSO:
 - T0 epochs are normal training, no regularization

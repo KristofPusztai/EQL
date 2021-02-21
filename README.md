@@ -64,3 +64,6 @@ Training regiment is interpretted as debiased LASSO:
 - T0 epochs are normal training, no regularization
 - T1 epochs are L1 regularized training, continuing where T0 ended
 - T2 epochs are L0 (weights with values close to 0, |w| < atol, are rounded to 0 and left untrained) regularized training, continuing from T1
+
+Check out the jupyter notebook for examples on learning sinusoidal functions:
+https://github.com/KristofPusztai/EQL/blob/master/Jupyter%20Notebooks/EQLtest.ipynb

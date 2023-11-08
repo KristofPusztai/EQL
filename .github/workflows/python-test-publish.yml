@@ -28,13 +28,21 @@ jobs:
         python -m pip install --upgrade pip
         pip install tensorflow==2.12.0 pytest
     - name: Run Pytests
-      run: pytest --junitxml=junit/test-results.xml
+      run: pytest --junitxml=test-results.xml
     - name: Upload pytest test results
       uses: actions/upload-artifact@v3
       with:
         name: pytest-results
-        path: junit/test-results.xml
-	report-path: junit/test-results.xml
+        path: test-results.xml
+      # Use always() to always run this step to publish test results when there are test failures
+      if: ${{ always() }}
+    - name: Generate Report
+      uses: dorny/test-reporter@v1
+      with:
+        artifact: test-results            # artifact name
+        name: Package Tests                  # Name of the check run which will be created
+        path: 'test-results.xml'                     # Path to test results (inside artifact .zip)
+        reporter: java-junit 
       # Use always() to always run this step to publish test results when there are test failures
       if: ${{ always() }}
 

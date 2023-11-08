@@ -1,6 +1,11 @@
-![GitHub release (latest by date)](https://img.shields.io/github/v/release/KristofPusztai/EQL?style=plastic)
-![PyPI - License](https://img.shields.io/pypi/l/EQL-NN)
-![GitHub issues](https://img.shields.io/github/issues/KristofPusztai/EQL)
+[![Test Pypi Action Badge](https://github.com/KristofPusztai/EQL/actions/workflows/python-test-publish.yml/badge.svg)](https://github.com/KristofPusztai/EQL/actions)
+
+[![GitHub release (latest by date)](https://img.shields.io/github/v/release/KristofPusztai/EQL?style=plastic)](https://pypi.org/project/EQL-NN/)
+
+[![PyPI - License](https://img.shields.io/pypi/l/EQL-NN)](https://opensource.org/license/mit/)
+
+[![GitHub issues](https://img.shields.io/github/issues/KristofPusztai/EQL)](https://github.com/KristofPusztai/EQL/issues)
+
 # Introduction:
 
 A tensorflow implementation of the Equation Learner Neural Network based model:

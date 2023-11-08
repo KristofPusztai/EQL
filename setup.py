@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="EQL-NN",
-    version="1.9.6", # MAJOR.MINOR.MAINTENANCE
+    version="1.9.7", # MAJOR.MINOR.MAINTENANCE
     author="Kristof Pusztai",
     author_email="kpusztai@berkeley.edu",
     description="A Tensorflow implementation of the Equation Learning Based Neural Network Model",
@@ -14,7 +14,7 @@ setuptools.setup(
     url="https://github.com/KristofPusztai/EQL",
     packages=setuptools.find_packages(),
     install_requires=[
-        'tensorflow',
+        'tensorflow>=2.11',
         'numpy'
     ],
     classifiers=[
@@ -22,5 +22,5 @@ setuptools.setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    python_requires='>=3.6',
+    python_requires='>=3.8',
 )

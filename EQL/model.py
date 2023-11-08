@@ -88,7 +88,7 @@ class EQL:
         return mask
 
     def build_and_compile_model(self, metrics=None, loss_weights=None, weighted_metrics=None,
-                                run_eagerly=None, optimizer=tf.keras.optimizers.Adam(0.001),
+                                run_eagerly=None, optimizer=tf.keras.optimizers.legacy.Adam(0.001),
                                 w_init='random_normal', b_init='random_normal', exclude=None):
         """
         Configures the model for training.

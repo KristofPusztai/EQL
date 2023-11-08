@@ -1,5 +1,9 @@
 import tensorflow as tf
 
+import sys
+
+sys.path[0] = sys.path[0][:-6] # Adding parent directory to path for EQL imports below
+
 from EQL.layer import EqlLayer, DenseLayer
 from EQL.model import EQL
 
@@ -9,7 +13,6 @@ def test1():  # Tests layer construction
     linear_layer = EqlLayer('random_normal', 'random_normal', v=1)
     y = linear_layer(x)
     assert y.shape == (2, 5), 'Wrong shape of output!'
-    print('test1 successful')
 
 
 def test2():  # Tests layer dimension output
@@ -17,7 +20,6 @@ def test2():  # Tests layer dimension output
     linear_layer = EqlLayer('random_normal', 'random_normal', v=1)
     y = linear_layer(linear_layer(linear_layer(x)))
     assert y.shape == (10, 5), 'Wrong shape of output!'
-    print('test2 successful')
 
 
 def test3():  # Tests custom DenseLayer implementation
@@ -25,7 +27,6 @@ def test3():  # Tests custom DenseLayer implementation
     linear_layer = DenseLayer('random_normal', 'random_normal')
     y = linear_layer(x)
     assert y.shape == (10, 1), 'Wrong shape of output!'
-    print('test3 successful')
 
 
 def test4():  # Tests masking output for layers
@@ -83,7 +84,6 @@ def test4():  # Tests masking output for layers
     assert (_1 == [0., 0., 0., 0., 0., 0.]).all(), 'W_1 is not as expected (all 0)'
     assert _2[4] == 0, 'second to last value of W_2 is not 0'
     assert _2[5] == 0, 'last value of W_2 is not 0'
-    print('test4 successful')
 
 
 def test5():  # Tests model dimensionality as a whole
@@ -105,7 +105,6 @@ def test6():  # Tests l1 regularization
     test.fit(x, y, 0.01, t1=1)
     params = test.count_params()
     assert params == 60, 'trainable parameter count is wrong'
-    print('test6 successful')
 
 
 def test7():  # Tests l0 regularization
@@ -116,7 +115,6 @@ def test7():  # Tests l0 regularization
     test.fit(x, y, 0.01, t1=1, t2=1)
     params = test.count_params()
     assert params == 60, 'trainable parameter count is wrong'
-    print('test7 successful')
 
 
 def test8():  # Tests layer width parameter
@@ -124,7 +122,6 @@ def test8():  # Tests layer width parameter
     linear_layer = EqlLayer('random_normal', 'random_normal', v=2)
     y = linear_layer(x)
     assert y.shape == (2, 10), 'Wrong shape of output!'
-    print('test8 successful')
 
 
 def test9():    # Tests layer width parameter in model
@@ -135,7 +132,6 @@ def test9():    # Tests layer width parameter in model
     test.fit(x, y, 0.01, t1=1, t2=1)
     params = test.count_params()
     assert params == 101, 'trainable parameter count is wrong'
-    print('test9 successful')
 
 
 def test10():   # Tests layer exclusion parameter
@@ -151,16 +147,3 @@ def test10():   # Tests layer exclusion parameter
     test.fit(x, y, 0.0, t0=1)
     params = test.count_params()
     assert params == 10, 'trainable parameter count is wrong'
-    print('test10 successful')
-
-
-test1()
-test2()
-test3()
-test4()
-test5()
-test6()
-test7()
-test8()
-test9()
-test10()

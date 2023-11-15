@@ -1,4 +1,4 @@
-[![GitHub Action Badge](https://github.com/KristofPusztai/EQL/actions/workflows/python-test-publish.yml/badge.svg)](https://github.com/KristofPusztai/EQL/actions)
+[![GitHub Action Badge](https://github.com/KristofPusztai/EQL/actions/workflows/pytest.yml/badge.svg)](https://github.com/KristofPusztai/EQL/actions)
 
 [![GitHub release (latest by date)](https://img.shields.io/github/v/release/KristofPusztai/EQL?style=plastic)](https://pypi.org/project/EQL-NN/)
 

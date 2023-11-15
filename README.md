@@ -1,5 +1,7 @@
 [![GitHub Action Badge](https://github.com/KristofPusztai/EQL/actions/workflows/pytest.yml/badge.svg)](https://github.com/KristofPusztai/EQL/actions)
 
+[![codecov](https://codecov.io/gh/KristofPusztai/EQL/graph/badge.svg?token=5BLB6GHC7S)](https://codecov.io/gh/KristofPusztai/EQL)
+
 [![GitHub release (latest by date)](https://img.shields.io/github/v/release/KristofPusztai/EQL?style=plastic)](https://pypi.org/project/EQL-NN/)
 
 [![PyPI - License](https://img.shields.io/pypi/l/EQL-NN)](https://opensource.org/license/mit/)

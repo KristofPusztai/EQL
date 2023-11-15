@@ -6,3 +6,4 @@ setup
 testpip_upload
 /pip_upload
 .ipynb_checkpoints
+.coverage

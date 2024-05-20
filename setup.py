@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="EQL-NN",
-    version="2.0.2", # MAJOR.MINOR.MAINTENANCE
+    version="2.1.0", # MAJOR.MINOR.MAINTENANCE
     author="Kristof Pusztai",
     author_email="kpusztai@berkeley.edu",
     description="A Tensorflow implementation of the Equation Learning Based Neural Network Model",
@@ -15,7 +15,8 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     install_requires=[
         'tensorflow>=2.11',
-        'numpy'
+        'numpy',
+        'sympy'
     ],
     classifiers=[
         "Programming Language :: Python :: 3",

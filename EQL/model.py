@@ -2,6 +2,8 @@ import tensorflow as tf
 
 from tensorflow import keras
 import numpy as np
+from sympy import *
+from math import floor
 from EQL.layer import EqlLayer, DenseLayer
 
 
@@ -313,6 +315,8 @@ class EQL:
                            sample_weight, initial_epoch, steps_per_epoch,
                            validation_steps, validation_batch_size, validation_freq,
                            max_queue_size, workers, use_multiprocessing)
+            for layer in self.model.layers[1:]:
+                layer._mask()
 
     def predict(self, x, batch_size=None, verbose=0, steps=None, callbacks=None, max_queue_size=10,
                 workers=1, use_multiprocessing=False):
@@ -380,6 +384,75 @@ class EQL:
         :rtype: np.ndarray
         """
         return self.model.layers[layer].get_weights()
+
+    def formula(self, raw_latex=False, reduce=True):
+        init_printing()
+
+        num_layers = self.num_layers + 1 # EQL + Dense
+        input_dim = len(self.get_weights(1)[0])
+
+        output = {}
+        # Looping through EQL layers
+        for layer in range(1, num_layers):
+            previous_output = output
+            output = {}
+            input_dim = len(self.get_weights(layer)[0])
+            prev_keys = list(previous_output.keys())
+            # Looping through input dimension of layer
+            for dim in range(input_dim):
+                layer_weights = self.get_weights(layer)[0][dim]
+                layer_biases = self.get_weights(layer)[1]
+                weight_index = 0
+                # Handling first layer defining sympy symbols
+                if layer == 1:
+                    symbol = symbols(f'x_{dim+1}')
+                else:
+                    symbol = previous_output[prev_keys[dim]]
+                # Looping through number of nodes in next layer, v * activations
+                for num_repetition in range(self.v[layer-1]):
+                    for activation in self.model.layers[layer].activations:
+                        if activation.__name__ == 'mult':
+                            if dim == 0:
+                                output[f'{activation.__name__}{num_repetition}'] = [layer_biases[weight_index], layer_biases[weight_index+1]]
+                            output[f'{activation.__name__}{num_repetition}'][0] += layer_weights[weight_index] * symbol
+                            output[f'{activation.__name__}{num_repetition}'][1] += layer_weights[weight_index+1] * symbol
+                            weight_index += 1 # Skip over second mult node
+                        else:
+                            if dim == 0:
+                                output[f'{activation.__name__}{num_repetition}'] = layer_biases[weight_index]
+                            output[f'{activation.__name__}{num_repetition}'] +=  layer_weights[weight_index] * symbol
+                        weight_index += 1
+                    
+            for activation in output.keys():
+                if 'sin' in activation:
+                    output[activation] = sin(output[activation])
+                elif 'cos' in activation:
+                    output[activation] = cos(output[activation])
+                elif 'identity' in activation:
+                    continue
+                elif 'sigmoid' in activation:
+                    output[activation] = Function('\sigma')(output[activation])
+                elif 'mult' in activation:
+                    output[activation] = output[activation][0] * output[activation][1]
+                else:
+                    raise Exception(activation, 'Not a valid activation')
+
+        # DenseLayer
+        f = 0
+        layer = self.get_weights(len(self.model.layers)-1)
+         # Looping through weights for each input dimension
+        for dim in range(len(layer[0])):
+            if dim == 0:
+                f += layer[1][0]
+            # Looping through activation functions of previous layer
+            f += layer[0][dim][0] * output[list(output.keys())[dim]]
+
+        if reduce:
+            f = simplify(f)
+        if raw_latex:
+            return latex(f)
+        else:
+            return f
 
     def set_weights(self, layer, weights):
         """

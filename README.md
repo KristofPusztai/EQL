@@ -1,13 +1,8 @@
 [![GitHub Action Badge](https://github.com/KristofPusztai/EQL/actions/workflows/pytest.yml/badge.svg)](https://github.com/KristofPusztai/EQL/actions)
-
 [![codecov](https://codecov.io/gh/KristofPusztai/EQL/graph/badge.svg?token=5BLB6GHC7S)](https://codecov.io/gh/KristofPusztai/EQL)
-
 [![GitHub release (latest by date)](https://img.shields.io/github/v/release/KristofPusztai/EQL?style=plastic)](https://pypi.org/project/EQL-NN/)
-
 [![PyPI - License](https://img.shields.io/pypi/l/EQL-NN)](https://opensource.org/license/mit/)
-
 [![Downloads](https://static.pepy.tech/badge/eql-nn)](https://pepy.tech/project/eql-nn)
-
 [![GitHub issues](https://img.shields.io/github/issues/KristofPusztai/EQL)](https://github.com/KristofPusztai/EQL/issues)
 
 # Introduction:
@@ -61,6 +56,7 @@ in your model.
     EQLmodel.count_params() # Provides # trainable params
     EQLmodel.get_weights(layer) #returns array of layer values
     EQLmodel.set_weights(layer, weights) #sets weights of specified layer
+    EQLmodel.formula(raw_latex=False, reduce=True) # Returns interpretable equations via sympy
     
     EQLmodel.evaluate(x=None, y=None, batch_size=None, verbose=1,
                       sample_weight=None, steps=None,

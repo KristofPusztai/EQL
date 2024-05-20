@@ -1,7 +1,7 @@
 import tensorflow as tf
+import numpy as np
 
 import sys
-
 sys.path[0] = sys.path[0][:-6] # Adding parent directory to path for EQL imports below
 
 from EQL.layer import EqlLayer, DenseLayer
@@ -147,3 +147,20 @@ def test10():   # Tests layer exclusion parameter
     test.fit(x, y, 0.0, t0=1)
     params = test.count_params()
     assert params == 10, 'trainable parameter count is wrong'
+
+def test11():   # Tests simple sympy formula creation
+    EQLmodel = EQL(num_layers = 1)
+    EQLmodel.build_and_compile_model()
+    #Generating proper weights for EQL Layer
+    w1 = EQLmodel.model.layers[1].get_weights()
+    w1[0] = np.array([[0, 1, 0, 0, 0, 0]])
+    w1[1] = np.array([0,0,0,0,0,0])
+    
+    #Generating proper weights for Dense Layer
+    w2 = EQLmodel.model.layers[2].get_weights()
+    w2[0] = np.array([[0],[1],[0],[0],[0]])
+    w2[1] = np.array([0])
+
+    EQLmodel.set_weights(1, w1)    
+    EQLmodel.set_weights(2, w2)    
+    assert EQLmodel.formula(raw_latex = True) == '1.0 \\sin{\\left(1.0 x_{1} \\right)}', 'latex output is wrong'

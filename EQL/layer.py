@@ -22,8 +22,7 @@ def sigmoid(out, index):
 def mult(out, index):
     sum1 = tf.gather(out, [index], axis=1)
     sum2 = tf.gather(out, [index + 1], axis=1)
-    sum_input = tf.add(sum1, sum2)
-    return tf.multiply(sum_input, sum_input, name='mult_output')
+    return tf.multiply(sum1, sum2, name='mult_output')
 
 
 class EqlLayer(keras.layers.Layer):
@@ -54,6 +53,13 @@ class EqlLayer(keras.layers.Layer):
         if 'mult' in exclude:
             self.exclusion += 2
             self.activations.remove(mult)
+
+    def _mask(self):
+        for i in range(self.w.shape[0]):
+            w_mask = tf.matmul([self.w[i]], self.mask[0][i])[0]
+            self.w[i].assign(w_mask)
+        b_mask = tf.matmul([self.b], self.mask[1])[0]
+        self.b.assign(b_mask)
 
     def build(self, input_shape):
         self.w = self.add_weight(
@@ -93,9 +99,17 @@ class DenseLayer(keras.layers.Layer):
         self.b_initializer = initializers.get(b_initializer)
         self.mask = mask
 
+
+    def _mask(self):
+        for i in range(self.w.shape[0]):
+            w_mask = tf.matmul([self.w[i]], self.mask[0][i])[0]
+            self.w[i].assign(w_mask)
+        b_mask = tf.matmul([self.b], self.mask[1])[0]
+        self.b.assign(b_mask)
+
     def build(self, input_shape):
         self.w = self.add_weight(
-            shape=(input_shape[-1], 1),
+            shape=(input_shape[-1], 1), #TODO: Output of dense layer is 1, maybe change this for multi-dimensionality
             initializer=self.w_initializer,
             trainable=True, regularizer=self.regularizer
         )
